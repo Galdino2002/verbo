@@ -1,0 +1,259 @@
+.login-form {
+  width: min(100%, 414px);
+}
+
+.form-heading {
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  color: #b28243;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.form-heading h1 {
+  color: #172d3b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(32px, 4vw, 39px);
+  font-weight: 500;
+  letter-spacing: -.04em;
+  line-height: 1.14;
+  margin: 13px 0 10px;
+}
+
+.form-heading p {
+  color: #70808a;
+  font-size: 14px;
+  margin: 0;
+}
+
+.field-group {
+  margin-bottom: 20px;
+}
+
+.field-group label {
+  color: #304551;
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.input-wrap {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dfe4e3;
+  border-radius: 9px;
+  display: flex;
+  min-height: 52px;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.input-wrap:focus-within {
+  border-color: #1c6670;
+  box-shadow: 0 0 0 3px rgba(28, 102, 112, .11);
+}
+
+.input-wrap.has-error {
+  border-color: #c96b5d;
+}
+
+.input-wrap svg {
+  fill: none;
+  height: 18px;
+  margin: 0 13px 0 16px;
+  stroke: #839399;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  width: 18px;
+}
+
+.input-wrap input {
+  background: transparent;
+  border: 0;
+  color: #223c49;
+  flex: 1;
+  font-size: 14px;
+  min-width: 0;
+  outline: 0;
+  padding: 0 12px 0 0;
+}
+
+.input-wrap input::placeholder {
+  color: #a8b2b3;
+}
+
+.password-toggle {
+  background: transparent;
+  border: 0;
+  color: #71858b;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 10px 14px 10px 4px;
+}
+
+.password-toggle:hover,
+.text-button:hover,
+.signup-prompt button:hover {
+  color: #174f59;
+}
+
+.error-message {
+  color: #b45f52;
+  display: block;
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.form-options {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0 28px;
+}
+
+.remember-option {
+  align-items: center;
+  color: #697b82;
+  cursor: pointer;
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+}
+
+.remember-option input {
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.custom-checkbox {
+  align-items: center;
+  border: 1px solid #cbd6d5;
+  border-radius: 4px;
+  color: transparent;
+  display: inline-flex;
+  font-size: 10px;
+  height: 16px;
+  justify-content: center;
+  transition: background .2s, border-color .2s;
+  width: 16px;
+}
+
+.remember-option input:checked + .custom-checkbox {
+  background: #1c6670;
+  border-color: #1c6670;
+  color: #fff;
+}
+
+.remember-option input:focus-visible + .custom-checkbox {
+  outline: 2px solid #a9c9c5;
+  outline-offset: 2px;
+}
+
+.text-button,
+.signup-prompt button {
+  background: none;
+  border: 0;
+  color: #1b6670;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0;
+}
+
+.submit-button,
+.google-button {
+  align-items: center;
+  border-radius: 9px;
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 51px;
+  transition: transform .2s, box-shadow .2s, background .2s;
+  width: 100%;
+}
+
+.submit-button {
+  background: #1c6670;
+  border: 1px solid #1c6670;
+  box-shadow: 0 8px 16px rgba(28, 102, 112, .16);
+  color: #fff;
+  gap: 10px;
+}
+
+.submit-button svg {
+  fill: none;
+  height: 16px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  width: 16px;
+}
+
+.submit-button:hover {
+  background: #155762;
+  box-shadow: 0 10px 20px rgba(28, 102, 112, .22);
+  transform: translateY(-1px);
+}
+
+.divider {
+  align-items: center;
+  color: #a0acae;
+  display: flex;
+  font-size: 11px;
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.divider::before,
+.divider::after {
+  background: #e4e8e7;
+  content: "";
+  flex: 1;
+  height: 1px;
+}
+
+.google-button {
+  background: #fff;
+  border: 1px solid #dfe4e3;
+  color: #3d525b;
+  gap: 10px;
+}
+
+.google-button:hover {
+  background: #fbfcfb;
+  box-shadow: 0 5px 14px rgba(31, 54, 60, .08);
+  transform: translateY(-1px);
+}
+
+.google-mark {
+  color: #4285f4;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.signup-prompt {
+  color: #78868a;
+  font-size: 12px;
+  margin: 28px 0 0;
+  text-align: center;
+}
+
+.signup-prompt button {
+  margin-left: 3px;
+}
+
+@media (max-width: 420px) {
+  .form-options {
+    gap: 12px;
+  }
+}
