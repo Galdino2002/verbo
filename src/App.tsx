@@ -7,7 +7,6 @@ import './App.css';
 function App() {
   return <BrowserRouter><Routes>
     <Route path="/login" element={<Login />} />
-    <Route element={<ProtectedRoute><Layout><Navigate to="/home" replace /></Layout></ProtectedRoute>} />
     <Route path="/" element={<Navigate to="/home" replace />} />
     <Route path="/home" element={<ProtectedRoute><Layout><Home /></Layout></ProtectedRoute>} />
     <Route path="/jornada" element={<ProtectedRoute><Layout><Journey /></Layout></ProtectedRoute>} />
