@@ -36,7 +36,10 @@ export function ActivityPlayer({ activities, onComplete, onExit }: ActivityPlaye
 
   function next() {
     if (index === activities.length - 1) {
-      onComplete(earned, correctCount);
+      const finalReward = feedback === 'correct'
+        ? calculateXp(activity.xp, combo, activity.difficulty)
+        : 0;
+      onComplete(earned + finalReward, correctCount + (feedback === 'correct' ? 1 : 0));
       return;
     }
     setIndex(value => value + 1);
@@ -45,9 +48,15 @@ export function ActivityPlayer({ activities, onComplete, onExit }: ActivityPlaye
   }
 
   if (!activity) return <div className="empty-state"><strong>Atividade indisponível</strong><p>Não foi possível carregar esta atividade.</p><button className="primary-button" onClick={onExit}>Voltar</button></div>;
+  const leave = () => {
+    if (index > 0 || earned > 0 || Boolean(answer)) {
+      if (!window.confirm('Sair agora? Seu progresso desta atividade será perdido.')) return;
+    }
+    onExit();
+  };
   return <div className="lesson-page">
     <div className="lesson-top">
-      <button className="text-button" onClick={onExit}>← Sair da atividade</button>
+      <button className="text-button" onClick={leave}>← Sair da atividade</button>
       <div className="step-progress" aria-label={`Atividade ${index + 1} de ${activities.length}`}>{activities.map((item, itemIndex) => <span key={item.id} className={itemIndex <= index ? 'filled' : ''} />)}</div>
       <span aria-live="polite">{index + 1}/{activities.length}</span>
     </div>

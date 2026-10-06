@@ -31,7 +31,7 @@ export function AppRoutes() {
     <Route path="/ranking" element={<ProtectedPage><Ranking /></ProtectedPage>} />
     <Route path="/competicoes" element={<ProtectedPage><Competitions /></ProtectedPage>} />
     <Route path="/competicoes/resultado" element={<ProtectedPage><CompetitionResult /></ProtectedPage>} />
-    <Route path="/competicoes/:id" element={<ProtectedPage><Layout><Competitions /></Layout></ProtectedPage>} />
+    <Route path="/competicoes/:id" element={<ProtectedPage><Competitions /></ProtectedPage>} />
     <Route path="/duplas" element={<ProtectedPage><Competitions /></ProtectedPage>} />
     <Route path="/equipes" element={<ProtectedPage><Teams /></ProtectedPage>} />
     <Route path="/torneios" element={<ProtectedPage><Tournaments /></ProtectedPage>} />

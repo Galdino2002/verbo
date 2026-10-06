@@ -4,6 +4,7 @@ import { friends as seedFriends } from '../../data/social';
 import { defaultMissions } from '../../data/missions';
 import { getFeed, getFriends, getMissions, getNotifications, getProgress, saveFeed, saveFriends, saveMissions, saveNotifications, saveProgress } from '../../storage';
 import { Icon } from '../../components/ui/Icon';
+import { Modal } from '../../components/ui/Modal';
 
 function PageTitle({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
   return <div className="page-heading"><div><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></div></div>;
@@ -21,12 +22,13 @@ export function Missions() {
 
 export function Social() {
   const [items, setItems] = useState(getFeed);
+  const [commenting, setCommenting] = useState<string | null>(null);
   function like(id: string) {
     const next = items.map(item => item.id === id ? { ...item, liked: !item.liked, likes: item.likes + (item.liked ? -1 : 1) } : item);
     setItems(next);
     saveFeed(next);
   }
-  return <div className="page"><PageTitle eyebrow="COMUNIDADE" title="Feed" description="Celebre o progresso de quem está estudando com você." /><div className="feed-list">{items.map(item => <article className="feed-card" key={item.id}><div className="feed-avatar">{item.avatar}</div><div className="feed-content"><strong>{item.userName}</strong><p>{item.text}</p><span className="feed-reward">+{item.xp} XP</span><div className="feed-actions"><button className={`text-button ${item.liked ? 'liked' : ''}`} onClick={() => like(item.id)} aria-label={item.liked ? 'Remover curtida' : 'Curtir'}>♥ {item.likes}</button><button className="text-button" onClick={() => window.alert('Comentários mockados: continue incentivando seu amigo!')}>💬 {item.comments}</button></div></div></article>)}</div></div>;
+  return <div className="page"><PageTitle eyebrow="COMUNIDADE" title="Feed" description="Celebre o progresso de quem está estudando com você." /><div className="feed-list">{items.map(item => <article className="feed-card" key={item.id}><div className="feed-avatar">{item.avatar}</div><div className="feed-content"><strong>{item.userName}</strong><p>{item.text}</p><span className="feed-reward">+{item.xp} XP</span><div className="feed-actions"><button className={`text-button ${item.liked ? 'liked' : ''}`} onClick={() => like(item.id)} aria-label={item.liked ? 'Remover curtida' : 'Curtir'}>♥ {item.likes}</button><button className="text-button" onClick={() => setCommenting(item.id)}>💬 {item.comments}</button></div></div></article>)}</div>{commenting && <Modal title="Comentários" onClose={() => setCommenting(null)}><p className="muted">Comentários mockados ficam visíveis nesta experiência local.</p><button className="primary-button" onClick={() => setCommenting(null)}>Entendi</button></Modal>}</div>;
 }
 
 export function Friends() {
@@ -62,7 +64,7 @@ export function CompetitionResult() {
 
 export function Teams() {
   const [joined, setJoined] = useState(false);
-  return <div className="page"><PageTitle eyebrow="COMUNIDADE" title="Equipes" description="Aprenda em grupo e avance juntos." /><div className="team-card"><div className="team-emblem">V</div><div><h2>Guardiões da Palavra</h2><p>{joined ? 'Você faz parte desta equipe.' : '7 de 8 membros • 3.420 XP esta semana'}</p></div><button className="primary-button" onClick={() => setJoined(true)}>{joined ? 'Ver equipe' : 'Entrar na equipe'}</button></div>{joined && <div className="empty-state"><strong>Equipe desbloqueada!</strong><p>Os membros e o progresso semanal serão sincronizados localmente.</p></div>}</div>;
+  return <div className="page"><PageTitle eyebrow="COMUNIDADE" title="Equipes" description="Aprenda em grupo e avance juntos." /><div className="team-card"><div className="team-emblem">V</div><div><h2>Guardiões da Palavra</h2><p>{joined ? 'Você faz parte desta equipe.' : '7 de 8 membros • 3.420 XP esta semana'}</p></div>{joined ? <span className="team-status">✓ Você está dentro</span> : <button className="primary-button" onClick={() => setJoined(true)}>Entrar na equipe</button>}</div>{joined && <div className="empty-state"><strong>Equipe desbloqueada!</strong><p>Os membros e o progresso semanal serão sincronizados localmente.</p></div>}</div>;
 }
 
 export function Tournaments() {

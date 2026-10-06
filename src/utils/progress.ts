@@ -7,6 +7,13 @@ export function calculateXp(baseXp: number, combo = 0, difficulty: 'easy' | 'med
   return baseXp + difficultyBonus + comboBonus;
 }
 
+function localDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function updateProgress(xp: number, lessonId?: number, correct = true): void {
   const current = getProgress();
   if (lessonId !== undefined && current.completedLessonIds.includes(lessonId)) return;
@@ -19,9 +26,15 @@ export function updateProgress(xp: number, lessonId?: number, correct = true): v
     current.completedLessonIds = [...current.completedLessonIds, lessonId];
   }
   current.level = getLevelInfo(current.xp).title;
-  const today = new Date().toISOString().slice(0, 10);
-  if (!current.activityDates.includes(today)) current.activityDates = [...current.activityDates, today];
-  current.streak = Math.max(current.streak, 1);
+  const now = new Date();
+  const today = localDate(now);
+  const yesterdayDate = new Date(now);
+  yesterdayDate.setDate(now.getDate() - 1);
+  const yesterday = localDate(yesterdayDate);
+  if (!current.activityDates.includes(today)) {
+    current.activityDates = [...current.activityDates, today];
+    current.streak = current.activityDates.includes(yesterday) ? current.streak + 1 : 1;
+  }
   current.longestStreak = Math.max(current.longestStreak, current.streak);
   saveProgress(current);
 
