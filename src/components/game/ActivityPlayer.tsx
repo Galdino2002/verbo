@@ -1,35 +1,43 @@
 import { useState } from 'react';
-import type { Activity } from '../../types';
+import type { Activity, ActivityResult } from '../../types';
 import { calculateXp } from '../../utils/progress';
 import { Icon } from '../ui/Icon';
 
 type ActivityPlayerProps = {
   activities: Activity[];
-  onComplete: (xp: number, correctCount: number) => void;
+  onComplete: (result: ActivityResult) => void;
   onExit: () => void;
 };
 
 export function ActivityPlayer({ activities, onComplete, onExit }: ActivityPlayerProps) {
   const [index, setIndex] = useState(0);
+  const activity = activities[index];
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [combo, setCombo] = useState(0);
   const [earned, setEarned] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
-  const activity = activities[index];
+  const [wrongCount, setWrongCount] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
+  const [wrongActivityIds, setWrongActivityIds] = useState<number[]>([]);
+  const [orderedOptions, setOrderedOptions] = useState<string[]>(activity?.options || []);
 
   function submit() {
-    if (!answer || feedback) return;
-    const correct = answer === activity.correctAnswer;
+    if ((!answer && activity.type !== 'ordering') || feedback) return;
+    const submittedAnswer = activity.type === 'ordering' ? orderedOptions.join('|') : answer;
+    const correct = submittedAnswer.trim().toLocaleLowerCase() === activity.correctAnswer.trim().toLocaleLowerCase();
     if (correct) {
       const nextCombo = combo + 1;
       const reward = calculateXp(activity.xp, nextCombo, activity.difficulty);
       setCombo(nextCombo);
+      setMaxCombo(value => Math.max(value, nextCombo));
       setCorrectCount(value => value + 1);
       setEarned(value => value + reward);
       setFeedback('correct');
     } else {
       setCombo(0);
+      setWrongCount(value => value + 1);
+      setWrongActivityIds(value => [...value, activity.id]);
       setFeedback('wrong');
     }
   }
@@ -39,9 +47,17 @@ export function ActivityPlayer({ activities, onComplete, onExit }: ActivityPlaye
       const finalReward = feedback === 'correct'
         ? calculateXp(activity.xp, combo, activity.difficulty)
         : 0;
-      onComplete(earned + finalReward, correctCount + (feedback === 'correct' ? 1 : 0));
+      onComplete({
+        xp: earned + finalReward,
+        correctAnswers: correctCount + (feedback === 'correct' ? 1 : 0),
+        wrongAnswers: wrongCount,
+        questionsAnswered: activities.length,
+        maxCombo: Math.max(maxCombo, combo + (feedback === 'correct' ? 1 : 0)),
+        wrongActivityIds,
+      });
       return;
     }
+    setOrderedOptions(activities[index + 1]?.options || []);
     setIndex(value => value + 1);
     setAnswer('');
     setFeedback(null);
@@ -64,10 +80,10 @@ export function ActivityPlayer({ activities, onComplete, onExit }: ActivityPlaye
     <div className="question-card">
       <span className="eyebrow">{activity.type.replace('-', ' ').toUpperCase()} • {activity.difficulty.toUpperCase()}</span>
       <h1>{activity.question}</h1>
-      <div className="options" role="group" aria-label="Opções de resposta">{activity.options.map(option => <button key={option} type="button" className={answer === option ? 'option selected' : 'option'} aria-pressed={answer === option} disabled={Boolean(feedback)} onClick={() => setAnswer(option)}>{option}</button>)}</div>
+      {activity.type === 'fill-blank' || activity.type === 'verse' ? <div className="answer-input-wrap"><input className="answer-input" value={answer} disabled={Boolean(feedback)} onChange={event => setAnswer(event.target.value)} placeholder="Digite sua resposta" aria-label="Sua resposta" onKeyDown={event => { if (event.key === 'Enter') submit(); }} /><div className="answer-suggestions">{activity.options.map(option => <button key={option} type="button" className="suggestion" disabled={Boolean(feedback)} onClick={() => setAnswer(option)}>{option}</button>)}</div></div> : activity.type === 'ordering' ? <div className="options ordering-options" aria-label="Itens para ordenar">{orderedOptions.map((option, optionIndex) => <div className="ordering-row" key={option}><span>{option}</span><div><button type="button" className="move-button" disabled={Boolean(feedback) || optionIndex === 0} onClick={() => setOrderedOptions(items => { const next = [...items]; [next[optionIndex - 1], next[optionIndex]] = [next[optionIndex], next[optionIndex - 1]]; return next; })} aria-label={`Mover ${option} para cima`}>↑</button><button type="button" className="move-button" disabled={Boolean(feedback) || optionIndex === orderedOptions.length - 1} onClick={() => setOrderedOptions(items => { const next = [...items]; [next[optionIndex], next[optionIndex + 1]] = [next[optionIndex + 1], next[optionIndex]]; return next; })} aria-label={`Mover ${option} para baixo`}>↓</button></div></div>)}</div> : <div className="options" role="group" aria-label="Opções de resposta">{activity.options.map(option => <button key={option} type="button" className={answer === option ? 'option selected' : 'option'} aria-pressed={answer === option} disabled={Boolean(feedback)} onClick={() => setAnswer(option)}>{option}</button>)}</div>}
       {feedback === 'correct' && <div className="answer-feedback success" role="status"><strong>✓ Correto!</strong><p>{activity.explanation}</p><b>+{calculateXp(activity.xp, combo, activity.difficulty)} XP {combo > 1 && `• Combo x${Math.min(combo, 4)}`}</b></div>}
       {feedback === 'wrong' && <div className="answer-feedback" role="alert"><strong>✕ Ainda não!</strong><p>A resposta correta é <b>{activity.correctAnswer}</b>.</p><p>{activity.explanation}</p></div>}
-      {!feedback ? <button className="primary-button next-button" disabled={!answer} onClick={submit}>Responder <Icon name="arrow-right" size={16} /></button> : <button className="primary-button next-button" onClick={feedback === 'wrong' ? () => { setAnswer(''); setFeedback(null); } : next}>{feedback === 'wrong' ? 'Tentar novamente' : index === activities.length - 1 ? 'Concluir atividade' : 'Próxima pergunta'} <Icon name="arrow-right" size={16} /></button>}
+      {!feedback ? <button className="primary-button next-button" disabled={!answer && activity.type !== 'ordering'} onClick={submit}>Responder <Icon name="arrow-right" size={16} /></button> : <button className="primary-button next-button" onClick={feedback === 'wrong' ? () => { setAnswer(''); setFeedback(null); } : next}>{feedback === 'wrong' ? 'Tentar novamente' : index === activities.length - 1 ? 'Concluir atividade' : 'Próxima pergunta'} <Icon name="arrow-right" size={16} /></button>}
     </div>
   </div>;
 }

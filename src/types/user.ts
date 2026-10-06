@@ -10,7 +10,13 @@ export type UserProgress = {
   longestStreak: number;
   accuracy: number;
   activitiesCompleted: number;
+  questionsAnswered: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+  sessionsCompleted: number;
   versesBookmarked: string[];
+  markedVerses: string[];
+  notes: Record<string, string>;
   onboardingComplete: boolean;
   studyMinutesGoal: number;
   studyMinutesToday: number;

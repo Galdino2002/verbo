@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { friends as seedFriends } from '../../data/social';
 import { defaultMissions } from '../../data/missions';
-import { getFeed, getFriends, getMissions, getNotifications, getProgress, saveFeed, saveFriends, saveMissions, saveNotifications, saveProgress } from '../../storage';
+import { getFeed, getFriends, getMissions, getNotifications, getProgress, saveFeed, saveFriends, saveNotifications, saveProgress } from '../../storage';
 import { Icon } from '../../components/ui/Icon';
 import { Modal } from '../../components/ui/Modal';
 
@@ -11,24 +11,28 @@ function PageTitle({ eyebrow, title, description }: { eyebrow: string; title: st
 }
 
 export function Missions() {
-  const [missions, setMissions] = useState(getMissions);
-  function advance(id: string) {
-    const next = missions.map(m => m.id === id ? { ...m, progress: Math.min(m.target, m.progress + 1) } : m);
-    setMissions(next);
-    saveMissions(next);
-  }
-  return <div className="page"><PageTitle eyebrow="DESAFIOS DIÁRIOS" title="Missões" description="Pequenas metas para manter sua jornada em movimento." /><div className="mission-grid">{missions.map(mission => <article className="mission-card" key={mission.id}><div className="card-title-row"><span>{mission.cadence === 'daily' ? 'Hoje' : 'Esta semana'}</span><strong>+{mission.rewardXp} XP</strong></div><h2>{mission.title}</h2><p>{mission.description}</p><div className="mission-progress"><span style={{ width: `${(mission.progress / mission.target) * 100}%` }} /></div><div className="mission-footer"><small>{mission.progress}/{mission.target}</small><button className="text-button" disabled={mission.progress >= mission.target} onClick={() => advance(mission.id)}>{mission.progress >= mission.target ? '✓ Concluída' : 'Registrar progresso'}</button></div></article>)}</div></div>;
+  const [missions] = useState(getMissions);
+  return <div className="page"><PageTitle eyebrow="DESAFIOS DIÁRIOS" title="Missões" description="As missões avançam automaticamente quando você joga." /><div className="mission-grid">{missions.map(mission => <article className="mission-card" key={mission.id}><div className="card-title-row"><span>{mission.cadence === 'daily' ? 'Hoje' : 'Esta semana'}</span><strong>+{mission.rewardXp} XP</strong></div><h2>{mission.title}</h2><p>{mission.description}</p><div className="mission-progress"><span style={{ width: `${Math.min(100, (mission.progress / mission.target) * 100)}%` }} /></div><div className="mission-footer"><small>{mission.progress}/{mission.target}</small><span className={mission.progress >= mission.target ? 'mission-done' : 'muted'}>{mission.progress >= mission.target ? '✓ Concluída' : 'Em andamento'}</span></div></article>)}</div></div>;
 }
 
 export function Social() {
   const [items, setItems] = useState(getFeed);
   const [commenting, setCommenting] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
   function like(id: string) {
     const next = items.map(item => item.id === id ? { ...item, liked: !item.liked, likes: item.likes + (item.liked ? -1 : 1) } : item);
     setItems(next);
     saveFeed(next);
   }
-  return <div className="page"><PageTitle eyebrow="COMUNIDADE" title="Feed" description="Celebre o progresso de quem está estudando com você." /><div className="feed-list">{items.map(item => <article className="feed-card" key={item.id}><div className="feed-avatar">{item.avatar}</div><div className="feed-content"><strong>{item.userName}</strong><p>{item.text}</p><span className="feed-reward">+{item.xp} XP</span><div className="feed-actions"><button className={`text-button ${item.liked ? 'liked' : ''}`} onClick={() => like(item.id)} aria-label={item.liked ? 'Remover curtida' : 'Curtir'}>♥ {item.likes}</button><button className="text-button" onClick={() => setCommenting(item.id)}>💬 {item.comments}</button></div></div></article>)}</div>{commenting && <Modal title="Comentários" onClose={() => setCommenting(null)}><p className="muted">Comentários mockados ficam visíveis nesta experiência local.</p><button className="primary-button" onClick={() => setCommenting(null)}>Entendi</button></Modal>}</div>;
+  function addComment() {
+    if (!commenting || !commentText.trim()) return;
+    const next = items.map(item => item.id === commenting ? { ...item, comments: item.comments + 1, commentItems: [...(item.commentItems || []), { id: `${Date.now()}`, author: getProgress().name, text: commentText.trim() }] } : item);
+    setItems(next);
+    saveFeed(next);
+    setCommentText('');
+  }
+  const selected = items.find(item => item.id === commenting);
+  return <div className="page"><PageTitle eyebrow="COMUNIDADE" title="Feed" description="Celebre o progresso de quem está estudando com você." /><div className="feed-list">{items.map(item => <article className="feed-card" key={item.id}><div className="feed-avatar">{item.avatar}</div><div className="feed-content"><strong>{item.userName}</strong><p>{item.text}</p><span className="feed-reward">+{item.xp} XP</span><div className="feed-actions"><button className={`text-button ${item.liked ? 'liked' : ''}`} onClick={() => like(item.id)} aria-label={item.liked ? 'Remover curtida' : 'Curtir'}>♥ {item.likes}</button><button className="text-button" onClick={() => setCommenting(item.id)}>💬 {item.comments}</button></div></div></article>)}</div>{commenting && selected && <Modal title="Comentários" onClose={() => setCommenting(null)}><div className="comments-list">{(selected.commentItems || []).map(comment => <p key={comment.id}><strong>{comment.author}:</strong> {comment.text}</p>)}{!selected.commentItems?.length && <p className="muted">Seja a primeira pessoa a comentar.</p>}</div><label className="comment-input"><span>Seu comentário</span><textarea value={commentText} onChange={event => setCommentText(event.target.value)} placeholder="Incentive seu amigo..." /></label><button className="primary-button" disabled={!commentText.trim()} onClick={addComment}>Enviar comentário</button></Modal>}</div>;
 }
 
 export function Friends() {
@@ -44,10 +48,11 @@ export function Friends() {
 }
 
 export function Ranking() {
-  const [tab, setTab] = useState<'global' | 'friends'>('global');
+  const [tab, setTab] = useState<'global' | 'friends' | 'weekly' | 'monthly'>('global');
   const progress = getProgress();
-  const entries = [{ name: progress.name, xp: progress.xp, avatar: progress.name[0] || 'V' }, ...seedFriends.map(friend => ({ name: friend.name, xp: friend.xp, avatar: friend.avatar }))].sort((a, b) => b.xp - a.xp);
-  return <div className="page"><PageTitle eyebrow="COMPETIÇÃO SAUDÁVEL" title="Ranking" description="Compare seu progresso e mantenha o foco na sua jornada." /><div className="tabs"><button className={tab === 'global' ? 'tab active' : 'tab'} onClick={() => setTab('global')}>Global</button><button className={tab === 'friends' ? 'tab active' : 'tab'} onClick={() => setTab('friends')}>Amigos</button></div><div className="ranking-list">{entries.map((entry, index) => <div className={`ranking-row ${entry.name === progress.name ? 'current' : ''}`} key={entry.name}><b>{index + 1 <= 3 ? ['🥇', '🥈', '🥉'][index] : `#${index + 1}`}</b><span className="avatar">{entry.avatar}</span><strong>{entry.name}</strong><span>{entry.xp.toLocaleString('pt-BR')} XP</span></div>)}</div><p className="muted">{tab === 'friends' ? 'Ranking entre pessoas que você conhece.' : 'Ranking local simulado para esta temporada.'}</p></div>;
+  const allEntries = [{ name: progress.name, xp: progress.xp, avatar: progress.name[0] || 'V' }, ...seedFriends.map(friend => ({ name: friend.name, xp: friend.xp, avatar: friend.avatar }))];
+  const entries = (tab === 'friends' ? allEntries.filter(entry => entry.name === progress.name || seedFriends.some(friend => friend.name === entry.name && friend.status === 'friend')) : allEntries).map(entry => ({ ...entry, xp: tab === 'weekly' ? Math.round(entry.xp * .35) : tab === 'monthly' ? Math.round(entry.xp * .75) : entry.xp })).sort((a, b) => b.xp - a.xp);
+  return <div className="page"><PageTitle eyebrow="COMPETIÇÃO SAUDÁVEL" title="Ranking" description="Compare seu progresso e mantenha o foco na sua jornada." /><div className="tabs"><button className={tab === 'global' ? 'tab active' : 'tab'} onClick={() => setTab('global')}>Global</button><button className={tab === 'friends' ? 'tab active' : 'tab'} onClick={() => setTab('friends')}>Amigos</button><button className={tab === 'weekly' ? 'tab active' : 'tab'} onClick={() => setTab('weekly')}>Semanal</button><button className={tab === 'monthly' ? 'tab active' : 'tab'} onClick={() => setTab('monthly')}>Mensal</button></div><div className="ranking-list">{entries.map((entry, index) => <div className={`ranking-row ${entry.name === progress.name ? 'current' : ''}`} key={entry.name}><b>{index + 1 <= 3 ? ['🥇', '🥈', '🥉'][index] : `#${index + 1}`}</b><span className="avatar">{entry.avatar}</span><strong>{entry.name}</strong><span>{entry.xp.toLocaleString('pt-BR')} XP</span></div>)}</div>{!entries.length && <div className="empty-state"><strong>Você ainda não tem amigos no ranking.</strong><p>Adicione pessoas para acompanhar o progresso delas.</p></div>}<p className="muted">{tab === 'friends' ? 'Ranking entre pessoas que você conhece.' : `Ranking ${tab === 'global' ? 'geral' : tab === 'weekly' ? 'da semana' : 'do mês'} com dados locais.`}</p></div>;
 }
 
 export function Competitions() {
@@ -80,7 +85,8 @@ export function Notifications() {
     setItems(next);
     saveNotifications(next);
   }
-  return <div className="page"><PageTitle eyebrow="CENTRAL DE AVISOS" title="Notificações" description="Acompanhe recompensas, missões e novidades." /><div className="notification-list">{items.map(item => <button className={`notification ${item.read ? 'read' : ''}`} key={item.id} onClick={() => markRead(item.id)}><span className="notification-dot">{item.read ? '✓' : '!'}</span><span><strong>{item.title}</strong><small>{item.description}</small></span></button>)}</div></div>;
+  function markAllRead() { const next = items.map(item => ({ ...item, read: true })); setItems(next); saveNotifications(next); }
+  return <div className="page"><PageTitle eyebrow="CENTRAL DE AVISOS" title="Notificações" description="Acompanhe recompensas, missões e novidades." /><div className="section-heading"><span className="muted">{items.filter(item => !item.read).length} não lidas</span><button className="text-button" disabled={!items.some(item => !item.read)} onClick={markAllRead}>Marcar todas como lidas</button></div><div className="notification-list">{items.map(item => <button className={`notification ${item.read ? 'read' : ''}`} key={item.id} onClick={() => markRead(item.id)}><span className="notification-dot">{item.read ? '✓' : '!'}</span><span><strong>{item.title}</strong><small>{item.description}</small></span></button>)}</div>{!items.length && <div className="empty-state"><strong>Tudo tranquilo por aqui.</strong><p>Novas recompensas e atividades aparecerão nesta área.</p></div>}</div>;
 }
 
 export function Settings() {

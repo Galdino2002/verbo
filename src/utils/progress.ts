@@ -1,4 +1,5 @@
-import { getMissions, getProgress, saveMissions, saveProgress } from '../storage';
+import { getMissions, getProgress, getReviews, saveMissions, saveProgress, saveReviews } from '../storage';
+import { activities } from '../data';
 import { getLevelInfo } from './levels';
 
 export function calculateXp(baseXp: number, combo = 0, difficulty: 'easy' | 'medium' | 'hard' = 'easy'): number {
@@ -14,13 +15,17 @@ function localDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export function updateProgress(xp: number, lessonId?: number, correct = true): void {
+export function updateProgress(xp: number, lessonId: number | undefined, result: { correctAnswers: number; wrongAnswers: number; questionsAnswered: number; wrongActivityIds: number[] }): void {
   const current = getProgress();
   if (lessonId !== undefined && current.completedLessonIds.includes(lessonId)) return;
 
   current.xp += xp;
   current.activitiesCompleted += 1;
-  current.accuracy = Math.round(((current.accuracy * Math.max(current.activitiesCompleted - 1, 0)) + (correct ? 100 : 0)) / current.activitiesCompleted);
+  current.questionsAnswered += result.questionsAnswered;
+  current.correctAnswers += result.correctAnswers;
+  current.wrongAnswers += result.wrongAnswers;
+  current.accuracy = current.questionsAnswered > 0 ? Math.round((current.correctAnswers / current.questionsAnswered) * 100) : 0;
+  current.sessionsCompleted += 1;
   if (lessonId !== undefined) {
     current.lessonsCompleted += 1;
     current.completedLessonIds = [...current.completedLessonIds, lessonId];
@@ -37,11 +42,17 @@ export function updateProgress(xp: number, lessonId?: number, correct = true): v
   }
   current.longestStreak = Math.max(current.longestStreak, current.streak);
   saveProgress(current);
+  if (result.wrongActivityIds.length > 0) {
+    const pending = getReviews();
+    const nextReviews = [...pending, ...result.wrongActivityIds.map(id => activities.find(activity => activity.id === id)).filter((activity): activity is (typeof activities)[number] => Boolean(activity))].filter((activity, index, list) => list.findIndex(item => item.id === activity.id) === index);
+    saveReviews(nextReviews);
+  }
 
   const missions = getMissions().map(mission => {
     if (mission.id === 'daily-activities' || mission.id === 'weekly-activities') {
       return { ...mission, progress: Math.min(mission.target, mission.progress + 1) };
     }
+    if (mission.id === 'daily-questions') return { ...mission, progress: Math.min(mission.target, mission.progress + result.questionsAnswered) };
     if (mission.id === 'daily-xp') return { ...mission, progress: Math.min(mission.target, mission.progress + xp) };
     return mission;
   });

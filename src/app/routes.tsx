@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
-import { Achievements, Bible, BibleReader, Challenge, CompetitionResult, Competitions, Friends, Home, Journey, Lesson, Login, Missions, Notifications, Onboarding, Profile, Ranking, Register, Review, Settings, Social, Teams, Tournaments } from '../pages';
+import { Achievements, Bible, BibleReader, Challenge, CompetitionResult, Competitions, DuelLobby, DuelMatch, DuelResult, Friends, GameTeams, GamesHome, Home, Journey, Lesson, Login, Missions, Notifications, Onboarding, Profile, Ranking, Register, Review, Settings, Social, TeamBattle, Teams, Tournaments } from '../pages';
 
 function ProtectedPage({ children }: { children: React.ReactNode }) {
   return <ProtectedRoute><Layout>{children}</Layout></ProtectedRoute>;
@@ -15,6 +15,12 @@ export function AppRoutes() {
     <Route path="/" element={<Navigate to="/home" replace />} />
     <Route path="/home" element={<ProtectedPage><Home /></ProtectedPage>} />
     <Route path="/jornada" element={<ProtectedPage><Journey /></ProtectedPage>} />
+    <Route path="/jogar" element={<ProtectedPage><GamesHome /></ProtectedPage>} />
+    <Route path="/jogar/duelo" element={<ProtectedPage><DuelLobby /></ProtectedPage>} />
+    <Route path="/jogar/duelo/partida" element={<ProtectedPage><DuelMatch /></ProtectedPage>} />
+    <Route path="/jogar/duelo/resultado" element={<ProtectedPage><DuelResult /></ProtectedPage>} />
+    <Route path="/jogar/equipes" element={<ProtectedPage><GameTeams /></ProtectedPage>} />
+    <Route path="/jogar/equipes/batalha" element={<ProtectedPage><TeamBattle /></ProtectedPage>} />
     <Route path="/licao/:id" element={<ProtectedPage><Lesson /></ProtectedPage>} />
     <Route path="/biblia" element={<ProtectedPage><Bible /></ProtectedPage>} />
     <Route path="/biblia/:book" element={<ProtectedPage><BibleReader /></ProtectedPage>} />

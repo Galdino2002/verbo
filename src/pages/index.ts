@@ -11,3 +11,4 @@ export { BibleReader } from './bible/BibleReader';
 export {
   CompetitionResult, Competitions, Friends, Missions, Notifications, Onboarding, Ranking, Register, Settings, Social, Teams, Tournaments,
 } from './experience/ExperiencePages';
+export { DuelLobby, DuelMatch, DuelResult, GameTeams, GamesHome, TeamBattle } from './game/GamePages';

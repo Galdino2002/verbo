@@ -24,3 +24,12 @@ export type Activity = {
   xp: number;
   difficulty: 'easy' | 'medium' | 'hard';
 };
+
+export type ActivityResult = {
+  xp: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+  questionsAnswered: number;
+  maxCombo: number;
+  wrongActivityIds: number[];
+};

@@ -1,6 +1,9 @@
 import { defaultMissions } from '../data/missions';
 import { feed as defaultFeed, friends as defaultFriends, notifications as defaultNotifications } from '../data/social';
 import type { FeedItem, Friend, Mission, Notification, UserProgress } from '../types';
+import type { Activity } from '../types';
+import type { GameMatch, GameResult, LocalTeam } from '../types/game';
+import { defaultTeams } from '../data/games';
 
 export const defaultProgress: UserProgress = {
   name: 'Jorge',
@@ -14,7 +17,13 @@ export const defaultProgress: UserProgress = {
   longestStreak: 0,
   accuracy: 0,
   activitiesCompleted: 0,
+  questionsAnswered: 0,
+  correctAnswers: 0,
+  wrongAnswers: 0,
+  sessionsCompleted: 0,
   versesBookmarked: [],
+  markedVerses: [],
+  notes: {},
   onboardingComplete: true,
   studyMinutesGoal: 10,
   studyMinutesToday: 0,
@@ -38,7 +47,13 @@ export function getProgress(): UserProgress {
       longestStreak: typeof stored.longestStreak === 'number' ? stored.longestStreak : defaultProgress.longestStreak,
       accuracy: typeof stored.accuracy === 'number' ? stored.accuracy : defaultProgress.accuracy,
       activitiesCompleted: typeof stored.activitiesCompleted === 'number' ? stored.activitiesCompleted : defaultProgress.activitiesCompleted,
+      questionsAnswered: typeof stored.questionsAnswered === 'number' ? stored.questionsAnswered : defaultProgress.questionsAnswered,
+      correctAnswers: typeof stored.correctAnswers === 'number' ? stored.correctAnswers : defaultProgress.correctAnswers,
+      wrongAnswers: typeof stored.wrongAnswers === 'number' ? stored.wrongAnswers : defaultProgress.wrongAnswers,
+      sessionsCompleted: typeof stored.sessionsCompleted === 'number' ? stored.sessionsCompleted : defaultProgress.sessionsCompleted,
       versesBookmarked: Array.isArray(stored.versesBookmarked) ? stored.versesBookmarked.filter((id): id is string => typeof id === 'string') : [],
+      markedVerses: Array.isArray(stored.markedVerses) ? stored.markedVerses.filter((id): id is string => typeof id === 'string') : [],
+      notes: stored.notes && typeof stored.notes === 'object' ? stored.notes as Record<string, string> : {},
       onboardingComplete: stored.onboardingComplete !== false,
       studyMinutesGoal: typeof stored.studyMinutesGoal === 'number' ? stored.studyMinutesGoal : defaultProgress.studyMinutesGoal,
       studyMinutesToday: typeof stored.studyMinutesToday === 'number' ? stored.studyMinutesToday : defaultProgress.studyMinutesToday,
@@ -80,6 +95,15 @@ export function getFeed(): FeedItem[] { return getJson('verbo_feed', defaultFeed
 export function saveFeed(value: FeedItem[]): void { localStorage.setItem('verbo_feed', JSON.stringify(value)); }
 export function getNotifications(): Notification[] { return getJson('verbo_notifications', defaultNotifications.map(n => ({ ...n }))); }
 export function saveNotifications(value: Notification[]): void { localStorage.setItem('verbo_notifications', JSON.stringify(value)); }
+export function getReviews(): Activity[] { return getJson('verbo_reviews', [] as Activity[]); }
+export function saveReviews(value: Activity[]): void { localStorage.setItem('verbo_reviews', JSON.stringify(value)); }
+export function getGameMatch(): GameMatch | null { return getJson<GameMatch | null>('verbo_game_match', null); }
+export function saveGameMatch(value: GameMatch): void { localStorage.setItem('verbo_game_match', JSON.stringify(value)); }
+export function clearGameMatch(): void { localStorage.removeItem('verbo_game_match'); }
+export function getGameResults(): GameResult[] { return getJson('verbo_game_results', [] as GameResult[]); }
+export function saveGameResult(value: GameResult): void { localStorage.setItem('verbo_game_results', JSON.stringify([value, ...getGameResults()].slice(0, 20))); }
+export function getTeams(): LocalTeam[] { return getJson('verbo_teams', defaultTeams.map(team => ({ ...team, members: [...team.members] }))); }
+export function saveTeams(value: LocalTeam[]): void { localStorage.setItem('verbo_teams', JSON.stringify(value)); }
 export function resetMockData(): void {
-  ['verbo_progress', 'verbo_missions', 'verbo_friends', 'verbo_feed', 'verbo_notifications', 'verbo_onboarding'].forEach(key => localStorage.removeItem(key));
+  ['verbo_progress', 'verbo_missions', 'verbo_friends', 'verbo_feed', 'verbo_notifications', 'verbo_reviews', 'verbo_onboarding', 'verbo_game_match', 'verbo_game_results', 'verbo_teams'].forEach(key => localStorage.removeItem(key));
 }

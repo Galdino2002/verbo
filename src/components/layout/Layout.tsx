@@ -9,7 +9,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const progress = getProgress();
   const unreadNotifications = getNotifications().filter(notification => !notification.read).length;
   const primaryNav: [IconName, string, string][] = [
-    ['home', 'Início', '/home'], ['map', 'Jornada', '/jornada'], ['book', 'Bíblia', '/biblia'],
+    ['home', 'Início', '/home'], ['map', 'Jornada', '/jornada'], ['play', 'Jogar', '/jogar'], ['book', 'Bíblia', '/biblia'],
     ['brain', 'Revisão', '/revisao'], ['user', 'Perfil', '/perfil'],
   ];
   const secondaryNav: [IconName, string, string][] = [

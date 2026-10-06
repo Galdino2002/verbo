@@ -28,6 +28,7 @@ export type FeedItem = {
   likes: number;
   liked: boolean;
   comments: number;
+  commentItems?: { id: string; author: string; text: string }[];
 };
 
 export type Notification = {
