@@ -1,8 +1,0 @@
-.home-header { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 34px; }
-.header-kicker { color: #719092; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
-.header-welcome h1 { color: #173d49; font-family: Georgia, serif; font-size: clamp(30px, 4vw, 42px); font-weight: 400; letter-spacing: -.045em; margin: 9px 0 6px; }
-.header-welcome p { color: #718486; font-size: 15px; margin: 0; }
-.header-stats { align-items: center; color: #527276; display: flex; gap: 10px; }
-.header-stats span { background: #fff; border: 1px solid #e3ebe7; border-radius: 20px; font-size: 12px; padding: 10px 14px; }
-.header-stats b { margin-right: 4px; }
-@media (max-width: 560px) { .home-header { display: block; } .header-stats { margin-top: 20px; } }

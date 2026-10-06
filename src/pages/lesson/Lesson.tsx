@@ -1,0 +1,20 @@
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { activities, lessons } from '../../data';
+import { updateProgress } from '../../utils/progress';
+import { ActivityPlayer } from '../../components/game/ActivityPlayer';
+import { Icon } from '../../components/ui/Icon';
+
+export function Lesson() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const lesson = lessons.find(l => l.id === Number(id)) || lessons[0];
+  const [finished, setFinished] = useState(false);
+  const lessonActivities = activities.filter(activity => activity.lessonId === lesson.id);
+  function finish(xp: number): void {
+    updateProgress(xp, lesson.id, true);
+    setFinished(true);
+  }
+  if (finished) return <div className="lesson-result"><div className="result-icon"><Icon name="check" size={30} /></div><span className="eyebrow">LIÇÃO CONCLUÍDA</span><h1>Muito bem!</h1><p>Você concluiu <strong>{lesson.title}</strong>.</p><div className="result-xp">+{lesson.xp} XP</div><button className="primary-button" onClick={() => navigate('/jornada')}>Voltar para a jornada <Icon name="arrow-right" size={16} /></button></div>;
+  return <ActivityPlayer activities={lessonActivities.length > 0 ? lessonActivities : activities.slice(0, 2)} onComplete={finish} onExit={() => navigate('/jornada')} />;
+}

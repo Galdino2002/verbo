@@ -1,9 +1,0 @@
-.daily-verse { background: #1b4c57; border-radius: 20px; box-shadow: 0 12px 28px rgba(23,61,73,.12); color: #fff; overflow: hidden; padding: 32px 36px; position: relative; }
-.verse-content { position: relative; z-index: 1; }
-.card-label { color: #d4ad6c; font-size: 10px; font-weight: 800; letter-spacing: .15em; }
-.daily-verse blockquote { font-family: Georgia, serif; font-size: clamp(23px, 3vw, 31px); line-height: 1.28; margin: 23px 0 12px; max-width: 540px; }
-.daily-verse cite { color: #a9c7c8; font-size: 13px; font-style: normal; }
-.verse-decoration { color: rgba(235,199,128,.18); font-family: Georgia, serif; font-size: 210px; line-height: 1; position: absolute; right: 18px; top: -30px; }
-.primary-button { background: #d5ab63; border: 0; border-radius: 8px; color: #173d49; cursor: pointer; font-size: 12px; font-weight: 800; margin-top: 27px; padding: 12px 15px; transition: transform .2s, background .2s; }
-.primary-button:hover { background: #e4bd79; transform: translateY(-1px); }
-.primary-button span { font-size: 16px; margin-left: 12px; }
